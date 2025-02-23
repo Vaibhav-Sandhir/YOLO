@@ -33,22 +33,22 @@ class CNNBlock(nn.Module):
         self.leaky_relu = nn.LeakyReLU(0.1)
 
     def forward(self, x):
-        return self.leaky_relu(self.batch_norm(self.conv(x)))
+        return self.leaky_relu(self.batchnorm(self.conv(x)))
 
 
 class YOLOv1(nn.Module):
-    def __init__(self, in_channels):
+    def __init__(self, in_channels, split_size, num_boxes, num_classes):
         super(YOLOv1, self).__init__()
         self.architecture = architecture_config
         self.in_channels = in_channels
         self.darknet = self.create_darknet(self.architecture)
-        self.fcs = self.create_fcs()
+        self.fcs = self.create_fcs(split_size, num_boxes, num_classes)
 
     def forward(self, x):
         x = self.darknet(x)
         return self.fcs(torch.flatten(x, start_dim = 1))
 
-    def create_darket(self, architecture):
+    def create_darknet(self, architecture):
         layers = []
         in_channels = self.in_channels
 
@@ -78,6 +78,8 @@ class YOLOv1(nn.Module):
             nn.LeakyReLU(0.1),
             nn.Linear(in_features = 496, out_features = S * S * (C + B * 5))
         )
+        
+        return fcs
 
     def create_CNNBlock(self, x, in_channels):
         return CNNBlock(in_channels = in_channels,
@@ -87,6 +89,13 @@ class YOLOv1(nn.Module):
                         padding = x[3]
                         )
 
+def main():
+    S, B, C = 7, 2, 20
+    model = YOLOv1(3, S, B, C)
+    x = torch.randn((2, 3, 448, 448))
+    print(model(x).shape)
 
+if __name__ == "__main__":
+    main()
 
         
