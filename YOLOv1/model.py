@@ -92,7 +92,7 @@ class YOLOv1(nn.Module):
 def main():
     S, B, C = 7, 2, 20
     model = YOLOv1(3, S, B, C)
-    x = torch.randn((2, 3, 448, 448))
+    x = torch.randn((10, 3, 448, 448)) # (batch_size x channels x height x width)
     print(model(x).shape)
 
 if __name__ == "__main__":
